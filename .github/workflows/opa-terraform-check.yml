@@ -14,24 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
 
-    # Map your repo secrets to the env vars the Azurerm provider reads
-    env:
-      ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID_2 }}
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Explicitly log in to Azure using the provided secrets.
+      # This step ensures a fresh authentication is performed for the job.
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: |
+            {"clientId":"${{ secrets.AZURE_AD_CLIENT_ID_2 }}",
+            "clientSecret":"${{ secrets.AZURE_AD_CLIENT_SECRET }}",
+            "tenantId":"${{ secrets.AZURE_AD_TENANT_ID }}",
+            "subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}"}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-
-      # This step is for debugging. It will print the client ID used by the workflow.
-      - name: Echo client ID for debugging
-        run: |
-          echo "Using ARM_CLIENT_ID: $ARM_CLIENT_ID"
 
       - name: Terraform Init & Plan
         run: |
