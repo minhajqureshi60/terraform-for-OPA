@@ -17,7 +17,7 @@ jobs:
 
     # Map your repo secrets to the env vars the Azurerm provider reads
     env:
-      ARM_CLIENT_ID:        ${{ secrets.AZURE_AD_CLIENT_ID }}
+      ARM_CLIENT_ID:        ${{ secrets.AZURE_AD_CLIENT_ID_2 }}
       ARM_CLIENT_SECRET:    ${{ secrets.AZURE_AD_CLIENT_SECRET }}
       ARM_TENANT_ID:        ${{ secrets.AZURE_AD_TENANT_ID }}
       ARM_SUBSCRIPTION_ID:  ${{ secrets.AZURE_SUBSCRIPTION_ID }}
