@@ -1,39 +1,46 @@
 package terraform.analysis
 
-# Fail on violations. conftest prints deny[] and exits non-zero.
+############################
+# Generic naming patterns  #
+############################
+
+# Fail when a resource name does not match its convention pattern.
 deny[msg] {
   rc := input.resource_changes[_]
   is_create_or_update(rc)
+
   pattern := regex_for(rc.type)
-  pattern != ""                                   # only check types we know
-  name := rc.change.after.name                    # resource must have "name"
+  pattern != ""                              # only check types we know
+
+  name := rc.change.after.name               # must have a name
   not regex.match(pattern, name)
-  kind := kind_for(rc.type)
+
   msg := sprintf("%s name %q does not match pattern %q (type: %s).",
-                 [kind, name, pattern, rc.type])
+    [kind_for(rc.type), name, pattern, rc.type])
 }
 
-# Extra Azure constraints for specific services
+############################
+# Azure-specific constraints
+############################
+
+# Key Vault: 3-24 chars, start with letter, only [a-z0-9-], must NOT end with '-'
 deny[msg] {
   rc := input.resource_changes[_]
   is_create_or_update(rc)
   rc.type == "azurerm_key_vault"
   name := rc.change.after.name
-  (endswith(name, "-")  # KV names can't end with '-'
-   or not regex.match("^[a-z][a-z0-9-]{2,23}$", name))  # 3–24, start w/ letter
-  msg := sprintf("Key Vault name %q must be 3–24 chars, start with a letter, " ||
-                 "contain only [a-z0-9-], and not end with '-'.", [name])
+  not regex.match("^[a-z][a-z0-9-]{1,22}[a-z0-9]$", name)
+  msg := sprintf("Key Vault name %q must be 3-24 chars, start with a letter, only [a-z0-9-], and must not end with '-'.", [name])
 }
 
+# Storage Account: 3-24 lowercase letters/digits, no dashes, require 'st' prefix
 deny[msg] {
   rc := input.resource_changes[_]
   is_create_or_update(rc)
   rc.type == "azurerm_storage_account"
   name := rc.change.after.name
-  # SA: 3–24 lowercase letters/digits, no dashes. Also require 'st' prefix by default.
-  not (regex.match("^st[a-z0-9]{2,22}$", name) and regex.match("^[a-z0-9]{3,24}$", name))
-  msg := sprintf("Storage Account name %q must be lowercase letters/digits, " ||
-                 "3–24 chars, no dashes, and start with 'st'.", [name])
+  not regex.match("^st[a-z0-9]{1,22}$", name)   # 'st' + 1..22 => total length 3..24
+  msg := sprintf("Storage Account name %q must be lowercase letters/digits only (no dashes), 3-24 chars total, and start with 'st'.", [name])
 }
 
 ############################
@@ -66,7 +73,9 @@ kind_for(t) := kind {
   kind := mapping[t]
 } else := kind { kind := t }
 
-
+# Name regex by resource type:
+# 1) use overrides from data.naming.regexes (policy.yaml) if present
+# 2) else fall back to these sensible defaults
 regex_for(t) := r {
   r := data.naming.regexes[t]
 } else := r {
@@ -79,11 +88,11 @@ regex_for(t) := r {
     "azurerm_public_ip":               "^pip-[a-z0-9-]+$",
     "azurerm_lb":                      "^lb-[a-z0-9-]+$",
     "azurerm_application_gateway":     "^(agw|appgw)-[a-z0-9-]+$",
-    "azurerm_key_vault":               "^kv-[a-z0-9-]{1,22}$",     # plus extra rule above
-    "azurerm_storage_account":         "^st[a-z0-9]{2,22}$",       # plus extra rule above
+    "azurerm_key_vault":               "^kv-[a-z0-9-]{1,22}$",     # convention; hard Azure rule above
+    "azurerm_storage_account":         "^st[a-z0-9]{1,22}$",       # convention; hard Azure rule above
     "azurerm_kubernetes_cluster":      "^aks-[a-z0-9-]+$",
     "azurerm_log_analytics_workspace": "^law-[a-z0-9-]+$",
-    "azurerm_container_registry":      "^acr[a-z0-9]{2,47}$",      # 5–50 alnum, we require 'acr'
+    "azurerm_container_registry":      "^acr[a-z0-9]{2,47}$",      # 5–50 alnum, enforced prefix 'acr'
     "azurerm_route_table":             "^rt-[a-z0-9-]+$",
   }
   r := defaults[t]
