@@ -1,4 +1,4 @@
-name: RG-Terraform
+name: Terraform
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   terraform:
-    name: RG-Terraform
+    name: Terraform
     runs-on: ubuntu-latest
     environment: dev
 

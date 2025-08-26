@@ -5,7 +5,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "resource" {
-  name     = "rg-resource_group"
+  name     = "resource_group"
   location = "eastus"
 
 }
