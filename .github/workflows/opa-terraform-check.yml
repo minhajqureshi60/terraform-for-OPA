@@ -30,7 +30,8 @@ jobs:
 
       # This step is for debugging. It will print the client ID used by the workflow.
       - name: Echo client ID for debugging
-        run: echo "Using ARM_CLIENT_ID: $ARM_CLIENT_ID"
+        run: |
+          echo "Using ARM_CLIENT_ID: $ARM_CLIENT_ID"
 
       - name: Terraform Init & Plan
         run: |
