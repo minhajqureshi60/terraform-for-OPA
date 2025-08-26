@@ -1,29 +1,32 @@
-name: OPA Policy Check
+# .github/workflows/terraform.yml
+name: Terraform
 
 on:
   push:
     branches: [ main ]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  opa-check:
+  terraform:
+    name: Terraform
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write   # required for OIDC
-      contents: read
+    environment: dev
+
+    # Map your repo secrets to the env vars the Azurerm provider reads
+    env:
+      ARM_CLIENT_ID:        ${{ secrets.AZURE_AD_CLIENT_ID }}
+      ARM_CLIENT_SECRET:    ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+      ARM_TENANT_ID:        ${{ secrets.AZURE_AD_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID:  ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # OIDC login to Azure – this makes `az` and the Azure CLI token available
-      - name: Azure login (OIDC)
-        uses: azure/login@v2
-        with:
-          client-id: ${{ '409a4aff-f820-4383-ba5f-a66e0a79ef06' }}
-          tenant-id: ${{ 'f2b8abc5-0bc8-417f-90e3-6a7c76060206' }}
-          subscription-id: ${{ 'd007a5f7-1c80-43e4-adbc-8f0387c82ed9' }}
-
-      - name: Install Terraform
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init & Plan
