@@ -1,33 +1,42 @@
-# .github/workflows/opa-terraform-check.yml
 name: OPA Policy Check
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
 
 jobs:
   opa-check:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write   # required for OIDC
+      contents: read
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # OIDC login to Azure – this makes `az` and the Azure CLI token available
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ '409a4aff-f820-4383-ba5f-a66e0a79ef06' }}
+          tenant-id: ${{ 'f2b8abc5-0bc8-417f-90e3-6a7c76060206' }}
+          subscription-id: ${{ 'd007a5f7-1c80-43e4-adbc-8f0387c82ed9' }}
 
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init & Plan
+        run: |
+          terraform init -input=false
+          terraform plan -out=tfplan.binary -input=false
+          terraform show -json tfplan.binary > terraform-plan.json
 
       - name: Install Conftest
         run: |
           wget https://github.com/open-policy-agent/conftest/releases/download/v0.45.0/conftest_0.45.0_Linux_x86_64.tar.gz
           tar -xzf conftest_0.45.0_Linux_x86_64.tar.gz
           sudo mv conftest /usr/local/bin
-
-      - name: Terraform Init & Plan
-        run: |
-          terraform init
-          terraform plan -out=tfplan.binary
-          terraform show -json tfplan.binary > terraform-plan.json
 
       - name: Run OPA Policy Checks
         run: conftest test terraform-plan.json --policy policies/
