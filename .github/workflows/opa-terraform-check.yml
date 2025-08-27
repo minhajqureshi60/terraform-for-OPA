@@ -47,3 +47,7 @@ jobs:
 
       - name: Run OPA Policy Checks
         run: conftest test terraform-plan.json --policy policies/
+
+      - name: Sanity check plan file
+        run: |
+          test -s terraform-plan.json || { echo "ERROR: terraform-plan.json missing or empty"; exit 1; }
