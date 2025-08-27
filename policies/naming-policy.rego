@@ -1,7 +1,5 @@
 package terraform.analysis
 
-default deny = []
-
 ############################
 # Generic naming patterns  #
 ############################
@@ -53,7 +51,7 @@ deny[msg] {
   is_create_or_update(rc)
   rc.type == "azurerm_storage_account"
   name := rc.change.after.name
-  not regex.match("^st[a-z0-9]{1,22}$", name)   # 'st' + 1..22 => total length 3..24
+  not regex.match("^st[a-z0-9]{1,22}$", name)
   msg := sprintf("Storage Account name %q must be lowercase letters/digits only (no dashes), 3-24 chars total, and start with 'st'.", [name])
 }
 
