@@ -1,15 +1,16 @@
 name: Terraform
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+    branches: [ main ]                      # run when PR targets main
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
 
 jobs:
   terraform:
+    if: github.event.pull_request.base.ref == 'main'   # extra guard (optional)
     name: Terraform
     runs-on: ubuntu-latest
     environment: dev
