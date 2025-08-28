@@ -45,7 +45,7 @@ deny[msg] {
   not regex.match("^[a-z][a-z0-9-]{1,22}[a-z0-9]$", name)
   msg := sprintf("Key Vault name %q must be 3-24 chars, start with a letter, only [a-z0-9-], and must not end with '-'.", [name])
 }
-
+gtiu 
 ############################
 # Helpers & configuration  #
 ############################
