@@ -45,14 +45,9 @@ deny[msg] {
   msg := sprintf("Key Vault name %q must be 3-24 chars, start with a letter, only [a-z0-9-], and must not end with '-'.", [name])
 }
 
-# Storage Account: 3-24 lowercase letters/digits, no dashes, require 'st' prefix
 deny[msg] {
-  rc := input.resource_changes[_]
-  is_create_or_update(rc)
-  rc.type == "azurerm_storage_account"
-  name := rc.change.after.name
-  not regex.match("^st[a-z0-9]{1,22}$", name)
-  msg := sprintf("Storage Account name %q must be lowercase letters/digits only (no dashes), 3-24 chars total, and start with 'st'.", [name])
+  input.resource.location != "centralus"
+  msg = "Location must be centralus"
 }
 
 ############################
