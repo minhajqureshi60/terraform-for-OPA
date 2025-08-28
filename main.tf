@@ -1,9 +1,11 @@
+# main.tf
 provider "azurerm" {
   features {}
-  subscription_id = "d007a5f7-1c80-43e4-adbc-8f0387c82ed9"
+  subscription_id="d007a5f7-1c80-43e4-adbc-8f0387c82ed9"
 }
 
 resource "azurerm_resource_group" "resource" {
   name     = "rg-group"
-  location = "centralus"  # Also fix location per your OPA policy
+  location = "eastus"  
 }
+
