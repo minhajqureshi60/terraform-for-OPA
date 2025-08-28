@@ -46,11 +46,6 @@ deny[msg] {
   msg := sprintf("Key Vault name %q must be 3-24 chars, start with a letter, only [a-z0-9-], and must not end with '-'.", [name])
 }
 
-deny[msg] {
-  input.resource.location != "centralus"
-  msg = "Location must be centralus"
-}
-
 ############################
 # Helpers & configuration  #
 ############################
