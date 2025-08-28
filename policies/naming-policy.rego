@@ -71,6 +71,25 @@ deny[msg] {
     [kind_for(rc.type), name, pattern, rc.type])
 }
 
+#################################
+# ✅ Region Restriction Policy #
+#################################
+
+deny[msg] {
+  rc := input.resource_changes[_]
+  rc.type == "azurerm_resource_group"
+  region := rc.change.after.location
+  not allowed_region(region)
+  msg := sprintf("❌ Region %q is not allowed. Use only: eastus, centralus.", [region])
+}
+
+allowed_region(r) {
+  r == "eastus"
+} else {
+  r == "centralus"
+}
+
+
 ############################
 # Specific constraint: Resource Group
 ############################
