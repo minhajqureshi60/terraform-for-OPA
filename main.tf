@@ -6,6 +6,6 @@ provider "azurerm" {
 
 resource "azurerm_resource_group" "resource" {
   name     = "rg-group"
-  location = "centralus"  
+  location = "westus"  
 }
 
