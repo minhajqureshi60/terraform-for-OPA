@@ -51,4 +51,4 @@ jobs:
           sudo mv conftest /usr/local/bin
 
       - name: Run OPA Policy Checks
-        run: conftest test terraform-plan.json --policy policies/
+        run: conftest test terraform-plan.json --policy policies/ --namespace terraform.analysis
