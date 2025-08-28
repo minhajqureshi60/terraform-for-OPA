@@ -31,6 +31,7 @@ deny[msg] {
   msg := sprintf("❌ Resource Group name must start with 'rg-': got '%v'", [name])
 }
 
+
 ############################
 # Azure-specific constraints
 ############################
